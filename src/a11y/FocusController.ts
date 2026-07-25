@@ -165,7 +165,20 @@ export class FocusController {
   activateFocused(): void {
     const el = document.activeElement as HTMLElement | null
     if (!el || el === document.body) {
-      this.announcer.say('Nothing focused to activate')
+      // Cold start: nothing has been focused yet, so the first pinch has no
+      // target. Announcing a dead end here strands the user on the very first
+      // gesture they try. Take focus to the first control instead and say so;
+      // a second pinch then activates it. Deliberately not activating on this
+      // pinch — firing a control the user has not yet heard named would be a
+      // surprise action, which is exactly what focus-driven control avoids.
+      const els = this.getFocusableElements()
+      if (els.length === 0) {
+        this.announcer.say('Nothing on this page can be focused')
+        return
+      }
+      this.currentIndex = 0
+      this.applyFocusRing(els[0])
+      this.announcer.say(`Focused: ${labelFor(els[0])}. Pinch again to activate.`)
       return
     }
     this.announcer.say(`Activated: ${labelFor(el)}`)
