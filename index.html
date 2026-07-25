@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0d10" />
+    <title>Handsfree — gesture control for any web page</title>
+    <meta
+      name="description"
+      content="A client-side hand-gesture navigation engine for ordinary web pages: swipe, pinch, grab-scroll and dwell-to-click, driving real focus and semantics, not synthetic mouse coordinates."
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <p class="eyebrow">Handsfree</p>
+      <h1>Hands-free navigation for ordinary web pages</h1>
+      <p class="lede">
+        One script tag adds gesture control to any site — for people who cannot easily use a mouse, or
+        whose hands are full, wet, or gloved. Open palm to point, pinch to click, make a fist and drag to
+        scroll, swipe to move focus, spread two hands to zoom. Every action drives real DOM focus and tab
+        order, not a synthetic mouse pointer. 100% client-side: the camera feed and every frame of hand
+        tracking stay in this browser tab. No account, no API key, nothing uploaded.
+      </p>
+
+      <div class="panel">
+        <h2>Try it</h2>
+        <p style="color: var(--muted); margin-top: 0">
+          This page itself is running the engine (via <code>&lt;script&gt;</code> + a few lines of JS) so you
+          can navigate it hands-free right now — or see the two focused demos below.
+        </p>
+        <div class="source-row">
+          <a class="btn primary" href="/recipe.html">Open the cooking demo →</a>
+          <a class="btn" href="/plain.html">Open the plain-page drop-in proof →</a>
+          <span id="status" class="status-pill">starting…</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Gesture → action</h2>
+        <div class="gesture-legend">
+          <div class="item"><b>Open palm</b>Move — points a visible cursor; hovering focuses the nearest control; holding still triggers dwell-to-click.</div>
+          <div class="item"><b>Pinch</b>Click — activates whatever currently has keyboard focus.</div>
+          <div class="item"><b>Fist + drag</b>Scroll — grab the page and drag it, like a scrollbar you hold.</div>
+          <div class="item"><b>Swipe left / right</b>Focus — moves to the previous / next focusable element in tab order.</div>
+          <div class="item"><b>Two hands, spread apart</b>Zoom — page zoom level tracks hand separation.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Why this exists</h2>
+        <p style="color: var(--muted)">
+          Built for motor-accessibility use (anyone who finds a mouse or trackpad difficult) and for
+          hands-occupied contexts — cooking, workshop, clinical, lab — where touching a keyboard mid-task
+          isn't practical. See the README for the full accessibility contract and the third-party
+          attribution for MediaPipe Tasks Vision.
+        </p>
+      </div>
+    </div>
+    <script type="module" src="/demo/landing.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0d10" />
+    <title>Pan-Seared Salmon — hands-free recipe demo · Handsfree</title>
+    <meta
+      name="description"
+      content="A hands-free cooking demo: swipe to change steps, pinch to start the timer, fist-drag to scroll, no touching the screen with messy hands."
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <style>
+      .recipe-shell {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      @media (min-width: 760px) {
+        .recipe-shell {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+      .step-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .step-progress {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      #step-panel {
+        min-height: 180px;
+      }
+      #step-panel h2 {
+        color: var(--text);
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 22px;
+        margin: 0 0 10px;
+      }
+      #step-panel p {
+        font-size: 17px;
+        line-height: 1.6;
+        color: #cdd8de;
+      }
+      .timer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .timer .clock {
+        font: 28px/1 ui-monospace, monospace;
+        color: var(--accent-2);
+        min-width: 4ch;
+      }
+      ul.ingredients {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 340px;
+        overflow-y: auto;
+      }
+      ul.ingredients li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        background: #0f1319;
+        border: 1px solid var(--panel-border);
+      }
+      ul.ingredients li label {
+        flex: 1;
+        cursor: pointer;
+      }
+      ul.ingredients input:checked + label {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p class="eyebrow"><a href="/">← Handsfree</a></p>
+      <h1>Pan-Seared Salmon, hands-free</h1>
+      <p class="lede">
+        Stand back from the counter with wet or messy hands and cook the whole recipe without touching the
+        screen: swipe to move between steps, pinch (or point-and-hold to dwell-click) to start the timer,
+        make a fist and drag to scroll the ingredient list.
+      </p>
+
+      <div class="panel">
+        <h2>Hand tracking</h2>
+        <div class="source-row">
+          <span id="status" class="status-pill">starting…</span>
+          <label for="source-select" class="sr-only">Landmark source</label>
+          <select id="source-select">
+            <option value="auto">Auto (camera, falls back to replay)</option>
+            <option value="camera">Force camera</option>
+            <option value="replay:open-palm-move">Replay: open-palm move + dwell</option>
+            <option value="replay:pinch-click">Replay: pinch click</option>
+            <option value="replay:fist-scroll">Replay: fist scroll</option>
+            <option value="replay:swipe-right">Replay: swipe right (next step) ×2</option>
+            <option value="replay:swipe-left">Replay: swipe left (previous step) ×2</option>
+            <option value="replay:two-hand-spread">Replay: two-hand zoom</option>
+          </select>
+        </div>
+        <p style="color: var(--muted); font-size: 13px; margin-bottom: 0">
+          No camera? No problem — replay drives the identical pipeline from a recorded gesture trace.
+        </p>
+      </div>
+
+      <div class="recipe-shell">
+        <div class="panel">
+          <div class="step-nav">
+            <button id="prev-btn" class="btn" aria-label="Previous step">◀ Previous</button>
+            <span id="step-progress" class="step-progress">Step 1 of 6</span>
+            <button id="next-btn" class="btn" aria-label="Next step">Next ▶</button>
+          </div>
+          <div id="step-panel" tabindex="-1">
+            <h2 id="step-title"></h2>
+            <p id="step-body"></p>
+          </div>
+          <div id="timer-row" class="timer" hidden>
+            <span class="clock" id="timer-clock">00:00</span>
+            <button id="timer-start" class="btn primary">Start timer</button>
+            <button id="timer-reset" class="btn">Reset</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Ingredients</h2>
+          <ul class="ingredients" id="ingredients"></ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Gesture log</h2>
+        <div id="event-log" class="event-log" aria-hidden="true"></div>
+      </div>
+    </div>
+    <script type="module" src="/demo/recipe.ts"></script>
+  </body>
+</html>

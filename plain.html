@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Plain page — Handsfree drop-in proof</title>
+</head>
+<body>
+
+<h1>An ordinary, unstyled page</h1>
+<p>This page has no custom CSS, no framework, no build step of its own. It proves the integration path: one script tag, one function call, zero configuration.</p>
+
+<p><a href="/">Back to Handsfree</a> &middot; <a href="/recipe.html">Cooking demo</a></p>
+
+<h2>A form, like any other page might have</h2>
+<form>
+  <label>Name <input type="text" name="name"></label><br><br>
+  <label>Favorite gesture
+    <select name="gesture">
+      <option>Open palm</option>
+      <option>Pinch</option>
+      <option>Fist</option>
+      <option>Swipe</option>
+      <option>Two-hand spread</option>
+    </select>
+  </label><br><br>
+  <button type="button" onclick="alert('Clicked — via pinch, dwell, or an actual mouse, this fires the exact same click event.')">Click me</button>
+</form>
+
+<h2>Some links</h2>
+<ul>
+  <li><a href="#a">First link</a></li>
+  <li><a href="#b">Second link</a></li>
+  <li><a href="#c">Third link</a></li>
+</ul>
+
+<h2>Integration code</h2>
+<pre>&lt;script src="/handsfree.iife.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  HandsFree.init(); // camera with automatic replay fallback, zero config
+&lt;/script&gt;</pre>
+
+<!-- The actual integration: one script tag loading the vendored, pre-built
+     engine bundle, then a couple of lines of plain JS. No import map, no
+     bundler, no framework — this is what dropping Handsfree into any
+     existing site looks like. -->
+<script src="/handsfree.iife.js"></script>
+<script>
+  HandsFree.init({ replayTrace: 'swipe-right' }).catch(function (err) {
+    document.title = 'Handsfree init failed';
+    console.error(err);
+  });
+</script>
+
+</body>
+</html>
