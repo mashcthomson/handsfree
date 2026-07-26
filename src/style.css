@@ -118,6 +118,57 @@ h1 {
   margin-bottom: 2px;
 }
 
+.log-panel summary {
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.log-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.log-panel summary::before {
+  content: '▸';
+  color: var(--accent);
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+.log-panel[open] summary::before {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .log-panel summary::before {
+    transition: none;
+  }
+}
+
+.log-panel summary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.log-panel-note {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.log-panel-hint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 12px 0 10px;
+}
+
 .event-log {
   font: 12px/1.5 ui-monospace, monospace;
   background: #0a0c0f;

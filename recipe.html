@@ -141,10 +141,18 @@
         </div>
       </div>
 
-      <div class="panel">
-        <h2>Gesture log</h2>
+      <details class="panel log-panel">
+        <summary>
+          Gesture activity log
+          <span class="log-panel-note">— live telemetry, for the curious</span>
+        </summary>
+        <p class="log-panel-hint">
+          Every gesture the recognizer emits, in order, timestamped. This is the same signal driving the
+          status strip in the corner — shown here in full as proof that real classification is happening
+          frame-by-frame, not a scripted animation.
+        </p>
         <div id="event-log" class="event-log" aria-hidden="true"></div>
-      </div>
+      </details>
     </div>
     <script type="module" src="/demo/recipe.ts"></script>
   </body>

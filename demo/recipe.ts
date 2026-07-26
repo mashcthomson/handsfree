@@ -169,6 +169,46 @@ declare global {
 }
 window.__hfEvents = []
 
+// Human-readable line for the visible log — the raw event object still goes
+// into window.__hfEvents in full for headless verification (see below), so
+// this formatting is purely presentational and never affects what's tested.
+function describeEvent(event: { type: string; [k: string]: unknown }): string {
+  switch (event.type) {
+    case 'swipe':
+      return `Swipe ${event.direction}`
+    case 'spread-change':
+      return `Zoom ${(event.scale as number).toFixed(2)}x`
+    case 'dwell-progress':
+      return `Dwell ${Math.round((event.ratio as number) * 100)}%`
+    case 'dwell-trigger':
+      return 'Dwell → click'
+    case 'dwell-cancel':
+      return 'Dwell cancelled'
+    case 'cursor-move':
+      return `Cursor ${(event.x as number).toFixed(2)}, ${(event.y as number).toFixed(2)}`
+    case 'cursor-start':
+      return 'Pointing started'
+    case 'cursor-end':
+      return 'Pointing stopped'
+    case 'pinch':
+      return 'Pinch → click'
+    case 'fist-start':
+      return 'Grab-scroll started'
+    case 'fist-move':
+      return `Grab-scroll drag (${(event.dx as number).toFixed(2)}, ${(event.dy as number).toFixed(2)})`
+    case 'fist-end':
+      return 'Grab-scroll ended'
+    case 'spread-start':
+      return 'Zoom gesture started'
+    case 'spread-end':
+      return 'Zoom gesture ended'
+    case 'hand-lost':
+      return 'Hand lost'
+    default:
+      return event.type
+  }
+}
+
 function logEvent(line: string, raw: unknown): void {
   window.__hfEvents.push(raw)
   const row = document.createElement('div')
@@ -187,7 +227,7 @@ const engine = new HandsFreeEngine({
     statusEl.className = `status-pill ${mode === 'camera' ? 'live' : 'replay'}`
   },
   onGestureEvent: (event) => {
-    logEvent(JSON.stringify(event), event)
+    logEvent(describeEvent(event), event)
     // Give 'swipe' page-specific meaning — advance the recipe step —
     // instead of the engine's generic tab-order focus cycling. Every
     // other gesture (pinch, fist-scroll, dwell, two-hand zoom, cursor
