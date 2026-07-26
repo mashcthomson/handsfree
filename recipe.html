@@ -89,6 +89,10 @@
   <body>
     <div class="container">
       <p class="eyebrow"><a href="/">← Handsfree</a></p>
+      <!-- The <main> landmark is what tells assistive tech — and this engine's
+           cold-start focus — where the page's content begins, so a first
+           gesture lands on the recipe rather than on the back-link above. -->
+      <main>
       <h1>Pan-Seared Salmon, hands-free</h1>
       <p class="lede">
         Stand back from the counter with wet or messy hands and cook the whole recipe without touching the
@@ -153,6 +157,7 @@
         </p>
         <div id="event-log" class="event-log" aria-hidden="true"></div>
       </details>
+      </main>
     </div>
     <script type="module" src="/demo/recipe.ts"></script>
   </body>

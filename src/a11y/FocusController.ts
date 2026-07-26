@@ -176,9 +176,18 @@ export class FocusController {
         this.announcer.say('Nothing on this page can be focused')
         return
       }
-      this.currentIndex = 0
-      this.applyFocusRing(els[0])
-      this.announcer.say(`Focused: ${labelFor(els[0])}. Pinch again to activate.`)
+      // Prefer the first control inside the page's main content. Taking the
+      // first focusable in raw DOM order lands on site chrome — on a page whose
+      // header opens with a "back" link, the very next pinch would navigate off
+      // the page the user is trying to operate. Landmarks are the standard way
+      // to say "the content starts here", so use them when the host provides
+      // one, and fall back to document order when it does not.
+      const main =
+        this.root.querySelector<HTMLElement>('main, [role="main"]') ?? null
+      const start = (main && els.find((el) => main.contains(el))) || els[0]
+      this.currentIndex = els.indexOf(start)
+      this.applyFocusRing(start)
+      this.announcer.say(`Focused: ${labelFor(start)}. Pinch again to activate.`)
       return
     }
     this.announcer.say(`Activated: ${labelFor(el)}`)
