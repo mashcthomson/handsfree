@@ -37,13 +37,13 @@
 <p>This is the exact script running on this page — view source and compare.</p>
 <pre>&lt;script src="/handsfree.iife.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  HandsFree.init({ replayTrace: 'swipe-right' });
+  HandsFree.init({ replayTrace: 'swipe-right' }).catch(console.error);
 &lt;/script&gt;</pre>
 <p>
-  The minimum is <code>HandsFree.init()</code>, which uses the camera and falls
-  back to replay if it is unavailable. This page pins a specific replay trace so
-  the demo behaves the same for every visitor, including the many who open it on
-  a machine with no webcam.
+  The zero-config call is just <code>HandsFree.init()</code> — it uses the camera and
+  falls back to replay automatically if none is available. This page pins a specific
+  replay trace instead, purely so the demo behaves identically for every visitor,
+  including the many reading this on a machine with no webcam.
 </p>
 
 <!-- The actual integration: one script tag loading the vendored, pre-built
