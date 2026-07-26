@@ -58,6 +58,10 @@ export class HandsFreeEngine {
   private source: LandmarkSource | null = null
   private activeMode: SourceMode = 'replay'
   private hudEl: HTMLElement | null = null
+  private hudDot: HTMLElement | null = null
+  private hudSourceValue: HTMLElement | null = null
+  private hudPoseValue: HTMLElement | null = null
+  private hudEventValue: HTMLElement | null = null
   private lastEventLabel = ''
   private stopped = false
   /** Bumped on every start()/setSource() call. An in-flight source
@@ -239,50 +243,188 @@ export class HandsFreeEngine {
     }
   }
 
-  // --- HUD (visual debug overlay, optional) ------------------------------
+  // --- HUD (compact status/telemetry strip, optional) --------------------
+  //
+  // A small always-visible card proving that real gesture classification is
+  // happening (current pose, last recognized event, active input source) —
+  // deliberately not a raw JSON debug dump. It ships inline-styled (no
+  // dependency on host CSS, since /plain.html's whole point is running with
+  // zero stylesheet) and is `aria-hidden` because the same state changes are
+  // already spoken through the `Announcer`'s aria-live region — this is a
+  // decorative visual echo for sighted users, not a second announcement
+  // channel. A pointer-only collapse toggle is available (tabindex="-1": a
+  // convenience, not a keyboard-required control) so it can be tucked away
+  // during a demo without removing the proof entirely.
 
   private buildHud(): HTMLElement {
     const el = document.createElement('div')
     el.id = 'handsfree-hud'
+    el.setAttribute('aria-hidden', 'true')
     Object.assign(el.style, {
       position: 'fixed',
-      bottom: '12px',
-      right: '12px',
+      bottom: '16px',
+      right: '16px',
       zIndex: '2147483647',
-      font: '12px/1.4 ui-monospace, monospace',
-      background: 'rgba(15,17,21,0.86)',
+      minWidth: '178px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '6px',
+      font: '12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif',
       color: '#e6f7fb',
-      padding: '8px 10px',
-      borderRadius: '8px',
-      border: '1px solid rgba(34,211,238,0.4)',
+      background: 'rgba(15,17,21,0.92)',
+      padding: '10px 12px',
+      borderRadius: '10px',
+      border: '1px solid rgba(34,211,238,0.35)',
+      boxShadow: '0 6px 20px rgba(0,0,0,0.35)',
       pointerEvents: 'none',
-      whiteSpace: 'pre',
     })
+
+    const header = document.createElement('div')
+    Object.assign(header.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      fontSize: '10px',
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: '0.08em',
+      color: '#93a1ad',
+    })
+
+    const dot = document.createElement('span')
+    Object.assign(dot.style, {
+      width: '6px',
+      height: '6px',
+      borderRadius: '50%',
+      background: '#f59e0b',
+      flex: '0 0 auto',
+    })
+
+    const title = document.createElement('span')
+    title.textContent = 'Handsfree'
+    title.style.flex = '1'
+
+    const toggle = document.createElement('button')
+    toggle.type = 'button'
+    toggle.tabIndex = -1
+    toggle.setAttribute('aria-hidden', 'true')
+    toggle.textContent = '−'
+    Object.assign(toggle.style, {
+      pointerEvents: 'auto',
+      cursor: 'pointer',
+      background: 'transparent',
+      border: '1px solid rgba(147,161,173,0.4)',
+      color: '#93a1ad',
+      borderRadius: '4px',
+      width: '16px',
+      height: '16px',
+      padding: '0',
+      lineHeight: '1',
+      fontSize: '11px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    })
+    header.append(dot, title, toggle)
+
+    const body = document.createElement('div')
+    Object.assign(body.style, { display: 'flex', flexDirection: 'column', gap: '4px' })
+
+    const sourceRow = buildHudRow('Source')
+    const poseRow = buildHudRow('Pose')
+    const eventRow = buildHudRow('Event')
+    body.append(sourceRow.row, poseRow.row, eventRow.row)
+
+    toggle.addEventListener('click', () => {
+      const collapsing = body.style.display !== 'none'
+      body.style.display = collapsing ? 'none' : 'flex'
+      toggle.textContent = collapsing ? '+' : '−'
+    })
+
+    el.append(header, body)
     document.body.appendChild(el)
+
+    this.hudDot = dot
+    this.hudSourceValue = sourceRow.value
+    this.hudPoseValue = poseRow.value
+    this.hudEventValue = eventRow.value
     return el
   }
 
   private updateHud(lastEvent?: GestureEvent): void {
     if (!this.hudEl) return
-    const label = lastEvent ? summarizeEvent(lastEvent) : this.lastEventLabel || '—'
-    this.hudEl.textContent =
-      `handsfree · ${this.activeMode}\n` +
-      `pose: ${this.recognizer.getDebugPose()}\n` +
-      `event: ${label}`
+    const label = lastEvent ? summarizeEvent(lastEvent) : humanizeEventType(this.lastEventLabel) || 'waiting…'
+    if (this.hudDot) this.hudDot.style.background = this.activeMode === 'camera' ? '#6ee7b7' : '#f59e0b'
+    if (this.hudSourceValue) {
+      this.hudSourceValue.textContent =
+        this.activeMode === 'camera' ? 'Live camera' : `Replay · ${this.opts.replayTrace}`
+    }
+    if (this.hudPoseValue) this.hudPoseValue.textContent = humanizePose(this.recognizer.getDebugPose())
+    if (this.hudEventValue) this.hudEventValue.textContent = label
   }
+}
+
+function buildHudRow(label: string): { row: HTMLElement; value: HTMLElement } {
+  const row = document.createElement('div')
+  Object.assign(row.style, { display: 'flex', alignItems: 'baseline', gap: '8px' })
+
+  const labelEl = document.createElement('span')
+  labelEl.textContent = label
+  Object.assign(labelEl.style, {
+    flex: '0 0 auto',
+    minWidth: '46px',
+    fontSize: '10px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: '#93a1ad',
+  })
+
+  const value = document.createElement('span')
+  Object.assign(value.style, {
+    fontSize: '12px',
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+    color: '#e6f7fb',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  })
+  value.textContent = '—'
+
+  row.append(labelEl, value)
+  return { row, value }
+}
+
+function humanizePose(pose: string): string {
+  switch (pose) {
+    case 'OPEN_PALM':
+      return 'Open palm'
+    case 'FIST':
+      return 'Fist'
+    case 'PINCH':
+      return 'Pinch'
+    case 'POINT':
+      return 'Point'
+    default:
+      return '—'
+  }
+}
+
+function humanizeEventType(type: string): string {
+  if (!type) return ''
+  return type.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase())
 }
 
 function summarizeEvent(event: GestureEvent): string {
   switch (event.type) {
     case 'swipe':
-      return `swipe ${event.direction}`
+      return `Swipe ${event.direction}`
     case 'spread-change':
-      return `zoom ${event.scale.toFixed(2)}x`
+      return `Zoom ${event.scale.toFixed(2)}x`
     case 'dwell-progress':
-      return `dwell ${Math.round(event.ratio * 100)}%`
+      return `Dwell ${Math.round(event.ratio * 100)}%`
     case 'cursor-move':
-      return `cursor ${event.x.toFixed(2)},${event.y.toFixed(2)}`
+      return `Cursor ${event.x.toFixed(2)}, ${event.y.toFixed(2)}`
     default:
-      return event.type
+      return humanizeEventType(event.type)
   }
 }
